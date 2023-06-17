@@ -1,13 +1,15 @@
 package utils
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
 
-func CreateSlug(name string) string {
+func CreateSlug(name, author string) string {
 	// Remove special characters
-	slug := regexp.MustCompile(`[^a-zA-Z0-9\s]+`).ReplaceAllString(name, "")
+	slug_format := fmt.Sprintf("%s - %s", name, author)
+	slug := regexp.MustCompile(`[^a-zA-Z0-9\s]+`).ReplaceAllString(slug_format, "")
 
 	// Trim white space from both ends of the string
 	slug = strings.TrimSpace(slug)

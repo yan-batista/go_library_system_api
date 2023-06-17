@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"example.com/db/repositories"
@@ -20,8 +19,8 @@ func CreateBook(bookData models.BookDTO) error {
 		return errors.New("invalid value for quantity")
 	}
 
-	slug_format := fmt.Sprintf("%s - %s", bookData.Name, bookData.Author)
-	book_slug := utils.CreateSlug(slug_format)
+	
+	book_slug := utils.CreateSlug(bookData.Name, bookData.Author)
 
 	// if book is registered, return error
 	if _, err := repositories.ReadBook(book_slug); err == nil {
@@ -96,7 +95,7 @@ func UpdateBook(book_slug string, bookData models.BookDTO) error {
 	book := models.Book{
 		Id: result.Id,
 		Name: name,
-		Slug: utils.CreateSlug(bookData.Name),
+		Slug: utils.CreateSlug(name, author),
 		Author: author,
 		Publisher: publisher,
 		ISBN: isbn,
