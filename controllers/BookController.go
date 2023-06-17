@@ -6,6 +6,7 @@ import (
 
 	"example.com/models"
 	"example.com/services"
+	"github.com/gorilla/mux"
 )
 
 func CreateBook(w http.ResponseWriter, r *http.Request) {
@@ -28,4 +29,43 @@ func ReadBooks(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+func ReadBook(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	book_slug := params["book_slug"]
+
+	book, err := services.ReadBook(book_slug)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest);
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(book)
+}
+
+func UpdateBook(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	book_slug := params["book_slug"]
+
+	var bookData models.BookDTO
+	if err := json.NewDecoder(r.Body).Decode(&bookData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	if err := services.UpdateBook(book_slug, bookData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
+func DeleteBook(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	book_slug := params["book_slug"]
+
+	if err := services.DeleteBook(book_slug); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 }

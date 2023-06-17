@@ -48,3 +48,72 @@ func ReadBooks() ([]models.Book, error) {
 
 	return result, nil
 }
+
+func ReadBook(book_slug string) (models.Book, error) {
+	result, err := repositories.ReadBook(book_slug)
+	if err != nil {
+		return models.Book{}, err
+	}
+	return result, nil
+}
+
+func UpdateBook(book_slug string, bookData models.BookDTO) error {
+	// find book
+	result, err := repositories.ReadBook(book_slug); 
+	if err != nil {
+		return err
+	}
+
+	name := bookData.Name
+	if bookData.Name == "" {
+		name = result.Name
+	}
+	author := bookData.Author
+	if bookData.Author == "" {
+		author = result.Author
+	}
+	publisher := bookData.Publisher
+	if bookData.Publisher == "" {
+		publisher = result.Publisher
+	}
+	isbn := bookData.ISBN
+	if bookData.ISBN == "" {
+		isbn = result.ISBN
+	}
+	quantity := bookData.Quantity
+	if quantity < 0 {
+		quantity = result.Quantity
+	}
+
+	// update model data
+	book := models.Book{
+		Id: result.Id,
+		Name: name,
+		Slug: utils.CreateSlug(bookData.Name),
+		Author: author,
+		Publisher: publisher,
+		ISBN: isbn,
+		Quantity: quantity,
+		CreatedAt: result.CreatedAt,
+		UpdatedAt: time.Now(),
+	}
+
+	// update repo
+	if err := repositories.UpdateBook(book); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteBook(book_slug string) error {
+	// Verifica se a slug existe, antes de deletar
+	if _, err := repositories.ReadBook(book_slug); err != nil {
+		return err
+	}
+
+	if err := repositories.DeleteBook(book_slug); err != nil {
+		return err
+	}
+	return nil
+}

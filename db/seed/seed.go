@@ -47,6 +47,7 @@ func SeedDB() {
 
 func createBook(fake faker.Faker) {
 	name := fmt.Sprintf("%s %s", fake.Person().FirstName(), fake.Person().LastName() )
+
 	book := models.BookDTO{Name: fake.App().Name(), Author: name, Publisher: fake.Company().Name(), ISBN: fake.Numerify("###-##########"), Quantity: fake.IntBetween(0,100)}
 	services.CreateBook(book)
 }
