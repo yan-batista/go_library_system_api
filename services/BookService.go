@@ -22,9 +22,17 @@ func CreateBook(bookData models.BookDTO) error {
 	
 	book_slug := utils.CreateSlug(bookData.Name, bookData.Author)
 
-	// if book is registered, return error
+	// if book_slug is registered, return error
 	if _, err := repositories.ReadBook(book_slug); err == nil {
 		return errors.New("book already exists")
+	}
+	// if book_isbn is registered, return error
+	result, err := repositories.FindByQuery("", "", "", bookData.ISBN); 
+	if err != nil {
+		return err
+	}
+	if len(result) != 0 {
+		return errors.New("book with the same ISBN already exists")
 	}
 
 	book := models.Book{
@@ -46,8 +54,8 @@ func CreateBook(bookData models.BookDTO) error {
 	return nil
 }
 
-func ReadBooks() ([]models.Book, error) {
-	result, err := repositories.ReadBooks()
+func FindByQuery(name, author, publisher, isbn string) ([]models.Book, error) {
+	result, err := repositories.FindByQuery(name, author, publisher, isbn)
 	if err != nil {
 		return nil, err
 	}

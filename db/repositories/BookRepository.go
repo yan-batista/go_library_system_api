@@ -19,10 +19,10 @@ func CreateBook(book models.Book) error {
 	return nil
 }
 
-func ReadBooks() ([]models.Book, error) {
-	query = "SELECT * FROM books"
+func FindByQuery(name, author, publisher, isbn string) ([]models.Book, error) {
+	query = `SELECT * FROM books WHERE (? = '' OR name LIKE CONCAT('%', ?, '%')) AND (? = '' OR author LIKE CONCAT('%', ?, '%')) AND (? = '' OR publisher LIKE CONCAT('%', ?, '%')) AND (? = '' OR isbn LIKE CONCAT('%', ?, '%'))`
 
-	rows, err := connection.Query(query);
+	rows, err := connection.Query(query, name, name, author, author, publisher, publisher, isbn, isbn);
 	if err != nil {
 		return nil, err;
 	}

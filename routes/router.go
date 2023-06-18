@@ -12,12 +12,11 @@ func CreateRouter() *mux.Router {
 	bookRoutes := r.PathPrefix("/books").Subrouter()
 	//userRoutes := r.PathPrefix("/users").Subrouter()
 
-	bookRoutes.HandleFunc("/", controllers.CreateBook).Methods("POST")
-	bookRoutes.HandleFunc("/", controllers.ReadBooks).Methods("GET")
+	bookRoutes.HandleFunc("", controllers.CreateBook).Methods("POST")
+	bookRoutes.HandleFunc("", controllers.FindByQuery).Methods("GET")
 	bookRoutes.HandleFunc("/{book_slug}", controllers.ReadBook).Methods("GET")
 	bookRoutes.HandleFunc("/{book_slug}", controllers.UpdateBook).Methods("PUT")
 	bookRoutes.HandleFunc("/{book_slug}", controllers.DeleteBook).Methods("DELETE")
-	//bookRoutes.HandleFunc("", GetBookByQuery).Methods("GET")
 
 	return r
 }

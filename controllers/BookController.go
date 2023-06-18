@@ -21,8 +21,14 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ReadBooks(w http.ResponseWriter, r *http.Request) {
-	result, err := services.ReadBooks()
+func FindByQuery(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+    name := query.Get("name")
+    author := query.Get("author")
+    publisher := query.Get("publisher")
+    isbn := query.Get("isbn")
+
+	result, err := services.FindByQuery(name, author, publisher, isbn)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
