@@ -13,20 +13,59 @@ import (
 var connection = db.CreateConnection()
 
 func SeedDB() {
+	seedBooks()
+	seedUsers()
+}
+
+func seedUsers() {
 	query := `
-		CREATE TABLE IF NOT EXISTS books (
+		CREATE TABLE IF NOT EXISTS users (
 			id INT AUTO_INCREMENT,
-			name TEXT NOT NULL,
-			slug TEXT NOT NULL,
-			author TEXT NOT NULL,
-			publisher TEXT NOT NULL,
-			isbn TEXT NOT NULL,
-			quantity INT NOT NULL,
-			created_at DATETIME,
-			updated_at DATETIME,
+			first_name TEXT NOT NULL,
+			last_name TEXT NOT NULL,
+			email TEXT NOT NULL,
+			phone TEXT NOT NULL,
+			debt int NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id)
 		);
 	`
+
+	if _, err := connection.Exec(query); err != nil {
+		log.Fatal(err)
+	}
+
+	if _, err := connection.Exec("truncate users"); err != nil {
+		log.Fatal(err)
+	}
+
+	fake := faker.New()
+	for i := 0; i < 25; i++ {
+		go createUser(fake)
+	}
+}
+
+func createUser(fake faker.Faker) {
+	user := models.UserDTO{FirstName: fake.Person().FirstName(), LastName: fake.Person().LastName(), Email: fake.Person().Contact().Email, Phone: fake.Person().Contact().Phone}
+	services.CreateUser(user)
+}
+
+func seedBooks() {
+	query := `
+	CREATE TABLE IF NOT EXISTS books (
+		id INT AUTO_INCREMENT,
+		name TEXT NOT NULL,
+		slug TEXT NOT NULL,
+		author TEXT NOT NULL,
+		publisher TEXT NOT NULL,
+		isbn TEXT NOT NULL,
+		quantity INT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		PRIMARY KEY (id)
+	);
+`
 
 	// executa a query e verifica se houve algum erro
 	if _, err := connection.Exec(query); err != nil {
@@ -38,7 +77,7 @@ func SeedDB() {
 		log.Fatal(err)
 	}
 
-	// cria entradas no banco
+	// cria entradas de livros no banco
 	fake := faker.New()
 	for i := 0; i < 25; i++ {
 		go createBook(fake)

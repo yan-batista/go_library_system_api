@@ -18,7 +18,6 @@ func CreateBook(bookData models.BookDTO) error {
 	if (bookData.Quantity < 0) {
 		return errors.New("invalid value for quantity")
 	}
-
 	
 	book_slug := utils.CreateSlug(bookData.Name, bookData.Author)
 
