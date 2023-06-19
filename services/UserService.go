@@ -2,15 +2,15 @@ package services
 
 import (
 	"errors"
-	"regexp"
 
 	"example.com/db/repositories"
 	"example.com/models"
+	"example.com/utils"
 )
 
 func CreateUser(user models.UserDTO) error {
 	// check if email is valid
-    if(!isEmailValid(user.Email)) {
+    if(!utils.IsEmailValid(user.Email)) {
 		return errors.New("invalid email")
 	} 
 
@@ -32,7 +32,7 @@ func CreateUser(user models.UserDTO) error {
 }
 
 func FindUserByQuery(first_name, last_name, email string) ([]models.User, error) {
-	if(email != "" && !isEmailValid(email)) {
+	if(email != "" && !utils.IsEmailValid(email)) {
 		return nil, errors.New("invalid email")
 	}
 
@@ -44,8 +44,39 @@ func FindUserByQuery(first_name, last_name, email string) ([]models.User, error)
 	return result, nil
 }
 
+func UpdateUser(user_email string, user_data models.UserDTO) error {
+	// search user based on email on params
+	result, err := FindUserByQuery("", "", user_email)
+	if err != nil {
+		return err
+	}
+	if len(result) == 0 {
+		return errors.New("user not found")
+	}
+
+	// if we have an email to update
+	if user_data.Email != "" {
+		// check if new email is valid
+		if(!utils.IsEmailValid(user_data.Email)) {
+			return errors.New("invalid email")
+		}
+
+		// check if new email is not in use
+		result, err := FindUserByQuery("", "", user_data.Email)
+		if err != nil {
+			return err
+		}
+		if len(result) > 0 {
+			return errors.New("email already in use")
+		}
+	}
+
+	err = repositories.UpdateUser(user_email, user_data);
+	return err
+}
+
 func DeleteUser(email string) error {
-	if(!isEmailValid(email)) {
+	if(!utils.IsEmailValid(email)) {
 		return errors.New("invalid email")
 	}
 
@@ -56,8 +87,3 @@ func DeleteUser(email string) error {
 	return nil
 }
 
-func isEmailValid(email string) bool {
-	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9.!#$%&’*+/=?^_` + "`" + `{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$`)
-    isValid := emailRegex.MatchString(email)
-	return isValid
-}

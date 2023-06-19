@@ -20,6 +20,7 @@ func CreateRouter() *mux.Router {
 
 	userRoutes.HandleFunc("", controllers.CreateUser).Methods("POST")
 	userRoutes.HandleFunc("", controllers.FindUserByQuery).Methods("GET")
+	userRoutes.HandleFunc("/{email}", controllers.UpdateUser).Methods("PUT")
 	userRoutes.HandleFunc("/{email}", controllers.DeleteUser).Methods("DELETE")
 
 	return r

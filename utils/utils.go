@@ -22,3 +22,9 @@ func CreateSlug(name, author string) string {
 
 	return slug
 }
+
+func IsEmailValid(email string) bool {
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9.!#$%&’*+/=?^_` + "`" + `{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$`)
+    isValid := emailRegex.MatchString(email)
+	return isValid
+}
