@@ -61,6 +61,7 @@ func seedBooks() {
 		publisher TEXT NOT NULL,
 		isbn TEXT NOT NULL,
 		quantity INT NOT NULL,
+		description TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 		PRIMARY KEY (id)
@@ -87,6 +88,6 @@ func seedBooks() {
 func createBook(fake faker.Faker) {
 	name := fmt.Sprintf("%s %s", fake.Person().FirstName(), fake.Person().LastName() )
 
-	book := models.BookDTO{Name: fake.App().Name(), Author: name, Publisher: fake.Company().Name(), ISBN: fake.Numerify("###-##########"), Quantity: fake.IntBetween(0,100)}
+	book := models.BookDTO{Name: fake.App().Name(), Author: name, Publisher: fake.Company().Name(), ISBN: fake.Numerify("###-##########"), Quantity: fake.IntBetween(0,100), Description: fake.Lorem().Sentence(fake.IntBetween(1, 10))}
 	services.CreateBook(book)
 }

@@ -42,6 +42,7 @@ func CreateBook(bookData models.BookDTO) error {
 		Publisher: bookData.Publisher,
 		ISBN: bookData.ISBN,
 		Quantity: bookData.Quantity,
+		Description: bookData.Description,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -97,6 +98,10 @@ func UpdateBook(book_slug string, bookData models.BookDTO) error {
 	if quantity < 0 {
 		quantity = result.Quantity
 	}
+	description := bookData.Description
+	if description == "" {
+		description = result.Description
+	}
 
 	// update model data
 	book := models.Book{
@@ -106,6 +111,7 @@ func UpdateBook(book_slug string, bookData models.BookDTO) error {
 		Author: author,
 		Publisher: publisher,
 		ISBN: isbn,
+		Description: description,
 		Quantity: quantity,
 		CreatedAt: result.CreatedAt,
 		UpdatedAt: time.Now(),
