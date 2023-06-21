@@ -15,9 +15,10 @@ func RentBook(rentData models.Rent) error {
 	}
 
 	// find book
-	if result, err := ReadBook(rentData.BookSlug); err != nil {
+	book_result, err := ReadBook(rentData.BookSlug); 
+	if err != nil {
 		return err
-	} else if result.Quantity < 0 {
+	} else if book_result.Quantity < 0 {
 		return errors.New("there are no copies available")
 	}
 
@@ -28,8 +29,16 @@ func RentBook(rentData models.Rent) error {
 		return errors.New("user not found")
 	}
 
-	// check if user already rent that book
+	// check if user already rented that book
+	result, err := FindRentedBooks(rentData.BookSlug, rentData.UserEmail)
+	if err != nil {
+		return err
+	}
+	if len(result) > 0 {
+		return errors.New("user already rented this book")
+	}
 
+	// validates date
 	if err := validatesDate(rentData.ReturnDate); err != nil {
 		return err
 	}
@@ -39,6 +48,9 @@ func RentBook(rentData models.Rent) error {
 	}
 
 	// update quantity -1
+	if err := UpdateBook(rentData.BookSlug, models.BookDTO{Name: "", Author: "", Publisher: "", ISBN: "", Quantity: book_result.Quantity - 1, Description: ""}); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -48,8 +60,9 @@ func ReturnBook(rentData models.Rent) error {
 		return errors.New("data can't be empty")
 	}
 
-	// find book to see if it is are valid
-	if _, err := ReadBook(rentData.BookSlug); err != nil {
+	// find book to see if it is valid
+	book_result, err := ReadBook(rentData.BookSlug); 
+	if err != nil {
 		return err
 	}
 
@@ -61,14 +74,29 @@ func ReturnBook(rentData models.Rent) error {
 	}
 
 	// check if user actually rented book
+	result, err := FindRentedBooks(rentData.BookSlug, rentData.UserEmail)
+	if err != nil {
+		return err
+	}
+	if len(result) == 0 {
+		return errors.New("book not rented by user")
+	}
 
 	// check if user should pay fees. Check if book is late
+	fee := calculateFee(result[0].ReturnDate)
+	if fee > 0 {
+		if err := UpdateUser(rentData.UserEmail, models.UserDTO{FirstName: "", LastName: "", Email: "", Phone: "", Debt: fee}); err != nil {
+			return err
+		}
+	}
 
 	if err := repositories.ReturnBook(rentData); err != nil {
 		return err
 	}
 
-	// update quantity +1
+	if err := UpdateBook(result[0].Slug, models.BookDTO{Name: "", Author: "", Publisher: "", ISBN: "", Quantity: book_result.Quantity + 1, Description: ""}); err != nil {
+		return err
+	}
 	
 	return nil
 }
@@ -79,7 +107,13 @@ func ExtendRent(rentData models.Rent) error {
 		return errors.New("data can't be empty")
 	}
 
-	// find Rent
+	result, err := FindRentedBooks(rentData.BookSlug, rentData.UserEmail)
+	if err != nil {
+		return err
+	}
+	if len(result) == 0 {
+		return errors.New("book not rented by user")
+	}
 
 	if err := validatesDate(rentData.ReturnDate); err != nil {
 		return err
@@ -92,12 +126,11 @@ func ExtendRent(rentData models.Rent) error {
 	return nil
 }
 
-func FindRentedBooks() ([]models.RentedBook, error) {
-	result, err := repositories.FindRentedBooks(); 
+func FindRentedBooks(book_slug, user_email string) ([]models.RentedBook, error) {
+	result, err := repositories.FindRentedBooks(book_slug, user_email); 
 	if err != nil {
 		return nil, err
 	}
-
 	return result, nil
 }
 
@@ -114,4 +147,17 @@ func validatesDate(date time.Time) error {
 	}
 
 	return nil
+}
+
+func calculateFee(return_date time.Time) int {
+	money_per_day := 3
+
+	duration := time.Since(return_date)
+	days_late := int(duration.Hours() / 24)
+
+	fee := 0
+	if days_late > 0 {
+		fee = days_late * money_per_day
+	}
+	return fee
 }

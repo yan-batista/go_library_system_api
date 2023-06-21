@@ -48,9 +48,11 @@ func ExtendRent(w http.ResponseWriter, r *http.Request) {
 }
 
 func FindRentedBooks(w http.ResponseWriter, r *http.Request) {
-	// query
+	query := r.URL.Query()
+	book_slug := query.Get("slug")
+	user_email := query.Get("email")
 
-	result, err := services.FindRentedBooks(); 
+	result, err := services.FindRentedBooks(book_slug, user_email); 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

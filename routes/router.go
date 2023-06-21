@@ -28,6 +28,6 @@ func CreateRouter() *mux.Router {
 	rentRoutes.HandleFunc("", controllers.FindRentedBooks).Methods("GET")
 	rentRoutes.HandleFunc("", controllers.ExtendRent).Methods("PUT")
 	rentRoutes.HandleFunc("", controllers.ReturnBook).Methods("DELETE")
-
+	
 	return r
 }

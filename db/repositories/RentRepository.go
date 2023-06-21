@@ -28,17 +28,18 @@ func ExtendRent(rentData models.Rent) error {
 	return nil
 }
 
-func FindRentedBooks() ([]models.RentedBook, error) {
+func FindRentedBooks(book_slug, user_email string) ([]models.RentedBook, error) {
 	query := `
-		SELECT books.name, books.slug, books.author, books.publisher, books.isbn, users.email, users.phone, rent.return_date
+		SELECT books.name, books.slug, books.author, books.publisher, books.isbn, CONCAT(users.first_name, ' ', users.last_name) AS name, users.email, users.phone, rent.return_date
 		FROM users 
 		INNER JOIN rent
 		ON rent.user_email = users.email
 		INNER JOIN books
 		ON books.slug = rent.book_slug
+		WHERE (? = "" OR books.slug LIKE CONCAT('%', ?, '%')) AND (? = "" OR users.email LIKE CONCAT('%', ?, '%'))
 		ORDER BY books.slug
 	`
-	rows, err := connection.Query(query); 
+	rows, err := connection.Query(query, book_slug, book_slug, user_email, user_email); 
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func FindRentedBooks() ([]models.RentedBook, error) {
 	for rows.Next() {
 		var result models.RentedBook
 
-		err := rows.Scan(&result.Name, &result.Slug, &result.Author, &result.Publisher, &result.ISBN, &result.Email, &result.Phone, &result.ReturnDate);
+		err := rows.Scan(&result.BookName, &result.Slug, &result.Author, &result.Publisher, &result.ISBN, &result.UserName ,&result.Email, &result.Phone, &result.ReturnDate);
 		if err != nil {
 			return nil, err
 		}
