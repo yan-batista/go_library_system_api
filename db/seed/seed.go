@@ -15,6 +15,7 @@ var connection = db.CreateConnection()
 func SeedDB() {
 	seedBooks()
 	seedUsers()
+	seedRent()
 }
 
 func seedUsers() {
@@ -53,20 +54,20 @@ func createUser(fake faker.Faker) {
 
 func seedBooks() {
 	query := `
-	CREATE TABLE IF NOT EXISTS books (
-		id INT AUTO_INCREMENT,
-		name TEXT NOT NULL,
-		slug TEXT NOT NULL,
-		author TEXT NOT NULL,
-		publisher TEXT NOT NULL,
-		isbn TEXT NOT NULL,
-		quantity INT NOT NULL,
-		description TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-		PRIMARY KEY (id)
-	);
-`
+		CREATE TABLE IF NOT EXISTS books (
+			id INT AUTO_INCREMENT,
+			name TEXT NOT NULL,
+			slug TEXT NOT NULL,
+			author TEXT NOT NULL,
+			publisher TEXT NOT NULL,
+			isbn TEXT NOT NULL,
+			quantity INT NOT NULL,
+			description TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id)
+		);
+	`
 
 	// executa a query e verifica se houve algum erro
 	if _, err := connection.Exec(query); err != nil {
@@ -82,6 +83,28 @@ func seedBooks() {
 	fake := faker.New()
 	for i := 0; i < 25; i++ {
 		go createBook(fake)
+	}
+}
+
+func seedRent() {
+	query := `
+		CREATE TABLE IF NOT EXISTS rent (
+			id INT AUTO_INCREMENT,
+			book_slug TEXT NOT NULL,
+			user_email TEXT NOT NULL,
+			return_date DATE NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id)
+		);
+	`
+
+	if _, err := connection.Exec(query); err != nil {
+		log.Fatal(err)
+	}
+
+	if _, err := connection.Exec("truncate rent"); err != nil {
+		log.Fatal(err)
 	}
 }
 
