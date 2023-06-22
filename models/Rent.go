@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Rent struct {
 	BookSlug   string    `json:"book_slug"`
@@ -18,4 +20,20 @@ type RentedBook struct {
 	Email  		string    	`json:"email"`
 	Phone  		string    	`json:"Phone"`
 	ReturnDate 	time.Time 	`json:"return_date"`
+}
+
+type UserInfo struct {
+	UserName    string    	`json:"user_name"`
+	Email  		string    	`json:"email"`
+	Phone  		string    	`json:"Phone"`
+	ReturnDate 	time.Time 	`json:"return_date"`
+}
+
+type RentedBookInfo struct {
+	BookName    string    	`json:"book_name"`
+	Slug      	string    	`json:"slug"`
+	Author    	string    	`json:"author"`
+	Publisher 	string    	`json:"publisher"`
+	ISBN      	string    	`json:"isbn"`
+	Users		[]UserInfo 	`json:"users"`
 }

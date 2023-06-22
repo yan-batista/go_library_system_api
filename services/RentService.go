@@ -83,7 +83,7 @@ func ReturnBook(rentData models.Rent) error {
 	}
 
 	// check if user should pay fees. Check if book is late
-	fee := calculateFee(result[0].ReturnDate)
+	fee := calculateFee(result[0].Users[0].ReturnDate)
 	if fee > 0 {
 		if err := UpdateUser(rentData.UserEmail, models.UserDTO{FirstName: "", LastName: "", Email: "", Phone: "", Debt: fee}); err != nil {
 			return err
@@ -126,12 +126,61 @@ func ExtendRent(rentData models.Rent) error {
 	return nil
 }
 
-func FindRentedBooks(book_slug, user_email string) ([]models.RentedBook, error) {
+func FindRentedBooks(book_slug, user_email string) ([]models.RentedBookInfo, error) {
 	result, err := repositories.FindRentedBooks(book_slug, user_email); 
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+
+	// change data format
+	var formattedArray []models.RentedBookInfo
+	if len(result) > 0 {
+		for _, rented := range result {
+			if !checkFormattedContains(rented.Slug, &formattedArray) {
+				usersInfo := searchUsersInfo(rented.Slug, &result)
+				bookInfo := models.RentedBookInfo{
+					BookName: rented.BookName,
+					Slug: rented.Slug,
+					Author: rented.Author,
+					Publisher: rented.Publisher,
+					ISBN: rented.ISBN,
+					Users: usersInfo,
+				}
+				formattedArray = append(formattedArray, bookInfo)
+			}
+		}
+	}
+
+	return formattedArray, nil
+}
+
+// check if book slug is already formatted
+func checkFormattedContains(slug string, formattedArray *[]models.RentedBookInfo) bool {
+	for _, data := range *formattedArray {
+		if data.Slug == slug {
+			return true
+		}
+	}
+	return false
+}
+
+// search all users that rent a book by its slug
+func searchUsersInfo(slug string, rentedBookArray *[]models.RentedBook) []models.UserInfo {
+	var userArray []models.UserInfo
+
+	for _, data := range *rentedBookArray {
+		if data.Slug == slug {
+			userInfo := models.UserInfo{
+				UserName: data.UserName,
+				Email: data.Email,
+				Phone: data.Phone,
+				ReturnDate: data.ReturnDate,
+			}
+			userArray = append(userArray, userInfo)
+		}
+	}
+
+	return userArray
 }
 
 func validatesDate(date time.Time) error {
