@@ -57,7 +57,7 @@ type User struct {
 - User can't rent a book out of stock
 - User can't rent multiple copies of the same book
 - User can only return a book in their possession
-- User can rent a book for 7, 15 or 30 days
+- User can rent a book for 30 days max
 - In case a user doesn't return a book, they must pay $3 per day after return date. On return, the total fee is calculated.
 
 ## What I've learned

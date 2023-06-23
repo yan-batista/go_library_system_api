@@ -18,7 +18,7 @@ func RentBook(rentData models.Rent) error {
 	book_result, err := ReadBook(rentData.BookSlug); 
 	if err != nil {
 		return err
-	} else if book_result.Quantity < 0 {
+	} else if book_result.Quantity <= 0 {
 		return errors.New("there are no copies available")
 	}
 
@@ -36,6 +36,12 @@ func RentBook(rentData models.Rent) error {
 	}
 	if len(result) > 0 {
 		return errors.New("user already rented this book")
+	}
+
+	// limit the number of books rented
+	maxRent := 5
+	if result, _ := FindRentedBooks("", rentData.UserEmail); len(result) >= maxRent {
+		return errors.New("user can't rent more than 5 books")
 	}
 
 	// validates date
