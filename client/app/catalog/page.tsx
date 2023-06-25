@@ -2,6 +2,10 @@ import BooksTable from "../../components/BooksTable/table";
 import axios from "axios";
 import styles from "./page.module.scss";
 
+export const metadata = {
+  title: "Library System | Catalog",
+};
+
 export default async function () {
   const res = await axios.get("http://localhost:3001/api/books").then((res) => res);
   return (
